@@ -24,6 +24,7 @@ import Layout from '../layouts/Layout.astro';
       background-color: #020817;
       color: #cbd5e1;
       overflow-x: hidden;
+      scroll-behavior: smooth;
     }
     h1, h2, h3, h4, .font-display { font-family: var(--font-display); }
 
@@ -175,7 +176,7 @@ import Layout from '../layouts/Layout.astro';
     .eq-bar:nth-child(8) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.35s; }
   </style>
 </head>
-<body>
+<body class="scroll-smooth">
 
 <!-- ═══════════════════════════════════════════
      NAVBAR
