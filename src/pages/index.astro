@@ -1,11 +1,1312 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Welcome />
+  <!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fall in Luv Music — AI Music Production</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: var(--font-body);
+      background-color: #020817;
+      color: #cbd5e1;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4, .font-display { font-family: var(--font-display); }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* Glow utilities */
+    .glow-emerald { box-shadow: 0 0 40px rgba(16, 185, 129, 0.25), 0 0 80px rgba(16, 185, 129, 0.1); }
+    .glow-emerald-sm { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+    .glow-text { text-shadow: 0 0 40px rgba(52, 211, 153, 0.6); }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #f8fafc 0%, #34d399 50%, #6ee7b7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-text-white {
+      background: linear-gradient(180deg, #f8fafc 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Animated gradient border */
+    .border-gradient {
+      position: relative;
+      background: linear-gradient(#020817, #020817) padding-box,
+                  linear-gradient(135deg, rgba(52,211,153,0.4), rgba(255,255,255,0.05), rgba(52,211,153,0.2)) border-box;
+      border: 1px solid transparent;
+    }
+
+    /* Hero blob animations */
+    @keyframes blob-drift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 10px) scale(0.95); }
+    }
+    @keyframes blob-drift-2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-40px, 20px) scale(1.08); }
+      66% { transform: translate(20px, -30px) scale(0.92); }
+    }
+    .blob-1 { animation: blob-drift 12s ease-in-out infinite; }
+    .blob-2 { animation: blob-drift-2 15s ease-in-out infinite; }
+    .blob-3 { animation: blob-drift 18s ease-in-out infinite reverse; }
+
+    /* Waveform bars */
+    @keyframes wave-bar {
+      0%, 100% { height: 4px; }
+      50% { height: 100%; }
+    }
+    .wave-bar { animation: wave-bar ease-in-out infinite; }
+
+    /* Scan line animation for dashboard mockup */
+    @keyframes scan {
+      0% { transform: translateY(-100%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(800%); opacity: 0; }
+    }
+    .scan-line { animation: scan 4s ease-in-out infinite; }
+
+    /* Pulse ring */
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 0.4; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    .pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+    /* Fade-up on scroll */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fade-up 0.7s ease forwards; }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
+
+    /* Card hover */
+    .card-hover {
+      transition: transform 0.3s cubic-bezier(.22,.68,0,1.2), box-shadow 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(16,185,129,0.1);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #020817; }
+    ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+    /* Bento grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: auto;
+      gap: 1rem;
+    }
+    .bento-a { grid-column: span 7; grid-row: span 2; }
+    .bento-b { grid-column: span 5; }
+    .bento-c { grid-column: span 5; }
+    .bento-d { grid-column: span 4; }
+    .bento-e { grid-column: span 4; }
+    .bento-f { grid-column: span 4; }
+
+    @media (max-width: 1024px) {
+      .bento-a { grid-column: span 12; grid-row: span 1; }
+      .bento-b { grid-column: span 6; }
+      .bento-c { grid-column: span 6; }
+      .bento-d, .bento-e, .bento-f { grid-column: span 4; }
+    }
+    @media (max-width: 640px) {
+      .bento-grid { grid-template-columns: 1fr; }
+      .bento-a, .bento-b, .bento-c, .bento-d, .bento-e, .bento-f { grid-column: span 1; grid-row: span 1; }
+    }
+
+    /* Shimmer effect */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .shimmer {
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+      background-size: 800px 100%;
+      animation: shimmer 3s linear infinite;
+    }
+
+    /* Equalizer bars in hero mockup */
+    .eq-bar:nth-child(1) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0s; }
+    .eq-bar:nth-child(2) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.1s; }
+    .eq-bar:nth-child(3) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.2s; }
+    .eq-bar:nth-child(4) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.3s; }
+    .eq-bar:nth-child(5) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.15s; }
+    .eq-bar:nth-child(6) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.25s; }
+    .eq-bar:nth-child(7) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.05s; }
+    .eq-bar:nth-child(8) { animation: wave-bar 0.8s ease-in-out infinite; animation-delay: 0.35s; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════ -->
+<nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-white/[0.06]">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="#" class="flex items-center gap-2.5 group">
+      <div class="relative w-8 h-8 flex-shrink-0">
+        <div class="absolute inset-0 bg-emerald-500 rounded-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3 13.5 Q5 9 9 4.5 Q13 9 15 13.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <circle cx="9" cy="9" r="2" fill="#34d399"/>
+            <path d="M1 13.5 L17 13.5" stroke="#34d399" stroke-width="0.75" opacity="0.4"/>
+          </svg>
+        </div>
+      </div>
+      <span class="font-display font-700 text-slate-50 text-[15px] tracking-tight">Fall in Luv<span class="text-emerald-400"> Music</span></span>
+    </a>
+
+    <!-- Nav links (desktop) -->
+    <div class="hidden md:flex items-center gap-1">
+      <a href="#features" class="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors rounded-lg hover:bg-white/5">Features</a>
+      <a href="#deep-dive" class="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors rounded-lg hover:bg-white/5">Technology</a>
+      <a href="#pricing" class="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors rounded-lg hover:bg-white/5">Pricing</a>
+      <a href="#testimonials" class="px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-colors rounded-lg hover:bg-white/5">Reviews</a>
+    </div>
+
+    <!-- CTA -->
+    <div class="flex items-center gap-3">
+      <a href="#" class="hidden md:block text-sm text-slate-400 hover:text-slate-200 transition-colors px-3 py-2">Sign in</a>
+      <a href="#pricing" class="relative group px-4 py-2 rounded-lg text-sm font-medium text-white overflow-hidden glow-emerald-sm transition-all hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-lg"></div>
+        <div class="absolute inset-0 shimmer rounded-lg"></div>
+        <span class="relative">Get Started →</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section class="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-12 px-5 overflow-hidden">
+
+  <!-- Background ambient blobs -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="blob-1 absolute top-[15%] left-[10%] w-[500px] h-[500px] bg-emerald-500/[0.07] rounded-full blur-[120px]"></div>
+    <div class="blob-2 absolute top-[30%] right-[5%] w-[400px] h-[400px] bg-teal-400/[0.06] rounded-full blur-[100px]"></div>
+    <div class="blob-3 absolute bottom-[10%] left-[40%] w-[600px] h-[300px] bg-emerald-600/[0.05] rounded-full blur-[140px]"></div>
+    <!-- Grid lines -->
+    <div class="absolute inset-0" style="background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px;"></div>
+    <!-- Radial fade over grid -->
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 70% 50% at 50% 30%, transparent 30%, #020817 80%);"></div>
+  </div>
+
+  <!-- Badge -->
+  <div class="relative z-10 mb-6 animate-fade-up flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5">
+    <span class="relative flex h-2 w-2">
+      <span class="pulse-ring absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40"></span>
+      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+    </span>
+    <span class="text-xs text-emerald-300 font-medium tracking-wide">Now in open beta — 10,000 producers onboard</span>
+  </div>
+
+  <!-- Headline -->
+  <div class="relative z-10 text-center max-w-5xl mx-auto">
+    <h1 class="animate-fade-up delay-100 font-display font-800 text-5xl sm:text-7xl lg:text-8xl tracking-tighter leading-[0.92] mb-6">
+      <span class="gradient-text-white">Remix the</span><br />
+      <span class="gradient-text">future of sound.</span>
+    </h1>
+    <p class="animate-fade-up delay-200 text-slate-400 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
+      The ultimate AI co-producer. Stem separation, instant tempo sync, and vocal processing engineered for modern beatmakers.
+    </p>
+
+    <!-- CTAs -->
+    <div class="animate-fade-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
+      <a href="#pricing" class="relative group px-7 py-3.5 rounded-xl text-base font-medium text-white overflow-hidden glow-emerald transition-all hover:scale-105 w-full sm:w-auto text-center">
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-xl"></div>
+        <div class="absolute inset-0 shimmer rounded-xl"></div>
+        <span class="relative flex items-center justify-center gap-2">
+          Start Producing Free
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+      <a href="#features" class="group px-7 py-3.5 rounded-xl text-base font-medium text-slate-300 bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm hover:bg-white/[0.07] hover:text-white transition-all w-full sm:w-auto text-center">
+        <span class="flex items-center justify-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.25"/><path d="M6.5 6.5C6.5 5.67 7.17 5 8 5s1.5.67 1.5 1.5c0 .7-.45 1.28-1.08 1.43L8 8v1.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.5" fill="currentColor"/></svg>
+          See how it works
+        </span>
+      </a>
+    </div>
+
+    <!-- Dashboard Mockup -->
+    <div class="animate-fade-up delay-400 relative max-w-4xl mx-auto">
+      <!-- Glow behind mockup -->
+      <div class="absolute -inset-10 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -inset-4 bg-teal-400/5 rounded-3xl blur-2xl pointer-events-none"></div>
+
+      <!-- Main mockup container -->
+      <div class="relative border-gradient rounded-2xl overflow-hidden shadow-2xl" style="box-shadow: 0 40px 120px rgba(0,0,0,0.7), 0 0 60px rgba(16,185,129,0.08), inset 0 1px 0 rgba(255,255,255,0.06);">
+
+        <!-- Window chrome -->
+        <div class="flex items-center justify-between px-5 py-3.5 bg-slate-900/90 border-b border-white/[0.06]">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full bg-red-500/70"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500/70"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500/70"></div>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-800/80 rounded-md px-3 py-1">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="#64748b" stroke-width="1.2"/><path d="M8 8l2.5 2.5" stroke="#64748b" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <span class="text-slate-500 text-xs">app.fallinluvmusic.io</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-emerald-500/20 rounded flex items-center justify-center">
+              <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
+            </div>
+            <span class="text-xs text-emerald-400 font-medium">LIVE</span>
+          </div>
+        </div>
+
+        <!-- Dashboard body -->
+        <div class="bg-slate-950/95 p-5">
+          <!-- Top track bar -->
+          <div class="flex items-center gap-4 mb-5">
+            <div class="flex items-center gap-2 bg-slate-800/60 rounded-lg px-3 py-2 flex-1">
+              <div class="w-8 h-8 rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 9 Q4 3 6 1 Q8 3 10 9" stroke="white" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+              </div>
+              <div>
+                <div class="text-xs text-slate-200 font-medium">Track_01_vocal_main.wav</div>
+                <div class="text-xs text-slate-500">4:32 • 44.1kHz • 24bit</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <button class="w-7 h-7 rounded-md bg-slate-800/60 flex items-center justify-center">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2v6M3.5 5l4.5-3v6l-4.5-3z" fill="#94a3b8"/></svg>
+              </button>
+              <button class="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center glow-emerald-sm">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2.5v7l7-3.5-7-3.5z" fill="white"/></svg>
+              </button>
+              <button class="w-7 h-7 rounded-md bg-slate-800/60 flex items-center justify-center">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M8 2v6M2 5l4.5 3V2L2 5z" fill="#94a3b8"/></svg>
+              </button>
+            </div>
+            <div class="text-xs text-slate-400 flex-shrink-0 hidden sm:block">BPM <span class="text-emerald-400 font-medium font-display">128</span></div>
+            <div class="text-xs text-slate-400 flex-shrink-0 hidden sm:block">KEY <span class="text-emerald-400 font-medium font-display">Am</span></div>
+          </div>
+
+          <!-- Waveform / stems area -->
+          <div class="grid grid-rows-4 gap-1.5 mb-5">
+            <!-- Stem rows -->
+            <div class="flex items-center gap-2 h-10">
+              <div class="w-14 flex-shrink-0 text-right">
+                <span class="text-xs text-emerald-400 font-medium">VOCAL</span>
+              </div>
+              <div class="flex-1 h-full bg-slate-900/60 rounded-md overflow-hidden relative border border-white/[0.04]">
+                <div class="absolute inset-0" style="background: repeating-linear-gradient(90deg, rgba(52,211,153,0.5) 0px, rgba(52,211,153,0.3) 2px, rgba(52,211,153,0.1) 3px, transparent 4px, rgba(52,211,153,0.2) 6px, rgba(52,211,153,0.4) 8px, transparent 10px, transparent 12px); height: 100%; opacity: 0.6;"></div>
+                <div class="scan-line absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent top-0"></div>
+              </div>
+              <div class="w-6 h-6 rounded-md bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 h-10">
+              <div class="w-14 flex-shrink-0 text-right">
+                <span class="text-xs text-sky-400 font-medium">DRUMS</span>
+              </div>
+              <div class="flex-1 h-full bg-slate-900/60 rounded-md overflow-hidden relative border border-white/[0.04]">
+                <div class="absolute inset-0" style="background: repeating-linear-gradient(90deg, rgba(56,189,248,0.4) 0px, rgba(56,189,248,0.2) 2px, transparent 4px, rgba(56,189,248,0.5) 5px, rgba(56,189,248,0.3) 7px, transparent 9px, transparent 14px, rgba(56,189,248,0.4) 15px, transparent 17px); height: 100%; opacity: 0.7;"></div>
+              </div>
+              <div class="w-6 h-6 rounded-md bg-sky-500/20 border border-sky-500/30 flex items-center justify-center flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-sky-400"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 h-10">
+              <div class="w-14 flex-shrink-0 text-right">
+                <span class="text-xs text-violet-400 font-medium">BASS</span>
+              </div>
+              <div class="flex-1 h-full bg-slate-900/60 rounded-md overflow-hidden relative border border-white/[0.04]">
+                <div class="absolute inset-0" style="background: repeating-linear-gradient(90deg, rgba(139,92,246,0.5) 0px, rgba(139,92,246,0.2) 3px, transparent 6px, rgba(139,92,246,0.4) 10px, rgba(139,92,246,0.1) 13px, transparent 16px); height: 100%; opacity: 0.7;"></div>
+              </div>
+              <div class="w-6 h-6 rounded-md bg-violet-500/20 border border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 h-10">
+              <div class="w-14 flex-shrink-0 text-right">
+                <span class="text-xs text-amber-400 font-medium">OTHER</span>
+              </div>
+              <div class="flex-1 h-full bg-slate-900/60 rounded-md overflow-hidden relative border border-white/[0.04]">
+                <div class="absolute inset-0" style="background: repeating-linear-gradient(90deg, rgba(251,191,36,0.3) 0px, rgba(251,191,36,0.15) 2px, transparent 5px, rgba(251,191,36,0.4) 8px, transparent 12px, rgba(251,191,36,0.2) 15px, transparent 18px); height: 100%; opacity: 0.6;"></div>
+              </div>
+              <div class="w-6 h-6 rounded-md bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom EQ + stats row -->
+          <div class="flex items-end gap-3">
+            <!-- Mini EQ visualizer -->
+            <div class="flex items-end gap-px h-10 flex-shrink-0">
+              <div class="eq-bar w-1.5 bg-emerald-500 rounded-t-sm min-h-[4px]" style="height: 30%;"></div>
+              <div class="eq-bar w-1.5 bg-emerald-500 rounded-t-sm min-h-[4px]" style="height: 65%;"></div>
+              <div class="eq-bar w-1.5 bg-emerald-400 rounded-t-sm min-h-[4px]" style="height: 90%;"></div>
+              <div class="eq-bar w-1.5 bg-emerald-400 rounded-t-sm min-h-[4px]" style="height: 75%;"></div>
+              <div class="eq-bar w-1.5 bg-teal-400 rounded-t-sm min-h-[4px]" style="height: 85%;"></div>
+              <div class="eq-bar w-1.5 bg-teal-400 rounded-t-sm min-h-[4px]" style="height: 55%;"></div>
+              <div class="eq-bar w-1.5 bg-emerald-500 rounded-t-sm min-h-[4px]" style="height: 40%;"></div>
+              <div class="eq-bar w-1.5 bg-emerald-500 rounded-t-sm min-h-[4px]" style="height: 20%;"></div>
+            </div>
+
+            <!-- Stats chips -->
+            <div class="flex flex-wrap gap-2 flex-1">
+              <div class="bg-slate-800/70 border border-white/[0.06] rounded-lg px-2.5 py-1.5">
+                <div class="text-xs text-slate-500 mb-0.5">Latency</div>
+                <div class="text-sm font-display font-600 text-slate-200">12<span class="text-xs text-slate-400">ms</span></div>
+              </div>
+              <div class="bg-slate-800/70 border border-white/[0.06] rounded-lg px-2.5 py-1.5">
+                <div class="text-xs text-slate-500 mb-0.5">Stems</div>
+                <div class="text-sm font-display font-600 text-emerald-400">4/4</div>
+              </div>
+              <div class="bg-slate-800/70 border border-white/[0.06] rounded-lg px-2.5 py-1.5">
+                <div class="text-xs text-slate-500 mb-0.5">AI Model</div>
+                <div class="text-sm font-display font-600 text-slate-200">v3.1</div>
+              </div>
+              <div class="hidden sm:block bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2.5 py-1.5">
+                <div class="text-xs text-emerald-500 mb-0.5">Accuracy</div>
+                <div class="text-sm font-display font-600 text-emerald-400">99.9%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating info chips around mockup -->
+      <div class="absolute -left-4 top-1/3 hidden lg:flex items-center gap-2 bg-slate-900/90 border border-white/[0.08] backdrop-blur-xl rounded-xl px-3 py-2 shadow-xl">
+        <div class="w-6 h-6 rounded-lg bg-sky-500/20 flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="#38bdf8"><path d="M6 1L7.5 4.5H11L8.25 6.75L9.25 10.5L6 8.25L2.75 10.5L3.75 6.75L1 4.5H4.5L6 1Z"/></svg>
+        </div>
+        <span class="text-xs text-slate-300 font-medium whitespace-nowrap">Stem Ready</span>
+      </div>
+      <div class="absolute -right-4 top-1/2 hidden lg:flex items-center gap-2 bg-slate-900/90 border border-white/[0.08] backdrop-blur-xl rounded-xl px-3 py-2 shadow-xl">
+        <div class="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5a4 4 0 108 0 4 4 0 00-8 0z" fill="#34d399" opacity="0.3"/><path d="M5 3v2l1.5 1.5" stroke="#34d399" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <span class="text-xs text-slate-300 font-medium whitespace-nowrap">Real-time sync</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust bar -->
+  <div class="relative z-10 mt-16 text-center">
+    <p class="text-xs text-slate-600 uppercase tracking-widest mb-5">Trusted by producers at</p>
+    <div class="flex flex-wrap items-center justify-center gap-8 opacity-30">
+      <span class="font-display font-700 text-slate-400 text-lg tracking-tight">SONY</span>
+      <span class="font-display font-700 text-slate-400 text-lg tracking-tight">DEF JAM</span>
+      <span class="font-display font-700 text-slate-400 text-lg tracking-tight">INTERSCOPE</span>
+      <span class="font-display font-700 text-slate-400 text-lg tracking-tight">VIRGIN</span>
+      <span class="font-display font-700 text-slate-400 text-lg tracking-tight">COLUMBIA</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     BENTO FEATURES
+═══════════════════════════════════════════ -->
+<section id="features" class="relative py-28 px-5 overflow-hidden">
+  <!-- Background glow -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-emerald-500/[0.04] rounded-full blur-[150px]"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto">
+    <!-- Section header -->
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 mb-5">
+        <span class="text-xs text-emerald-400 font-medium tracking-wide uppercase">Feature Set</span>
+      </div>
+      <h2 class="font-display font-800 text-4xl lg:text-6xl tracking-tighter text-slate-50 leading-tight mb-4">
+        Every tool you need.<br />
+        <span class="gradient-text">Nothing you don't.</span>
+      </h2>
+      <p class="text-slate-400 text-lg max-w-xl mx-auto">Purpose-built AI that understands music theory, groove, and soul — not just signal processing.</p>
+    </div>
+
+    <!-- Bento grid -->
+    <div class="bento-grid">
+
+      <!-- A — Large hero card: Stem Separation -->
+      <div class="bento-a card-hover relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm p-8">
+        <!-- Glow bg -->
+        <div class="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-40 h-40 bg-teal-500/5 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 mb-5">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#34d399" opacity="0.3"/><circle cx="5" cy="5" r="2" fill="#34d399"/></svg>
+            <span class="text-xs text-emerald-400 font-medium">Core Feature</span>
+          </div>
+
+          <h3 class="font-display font-700 text-3xl lg:text-4xl text-slate-50 tracking-tighter mb-3">Studio-Quality<br />Stem Separation</h3>
+          <p class="text-slate-400 text-base leading-relaxed mb-8 max-w-sm">Isolate vocals, drums, bass, and melodic layers with unrivaled clarity. Our AI has been trained on 10M+ professional tracks.</p>
+
+          <!-- Fake stem visualizer -->
+          <div class="space-y-2.5">
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-emerald-400 w-14 text-right font-medium">VOCAL</span>
+              <div class="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full" style="width: 88%; transition: width 2s;"></div>
+              </div>
+              <span class="text-xs text-slate-500 w-8">88%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-sky-400 w-14 text-right font-medium">DRUMS</span>
+              <div class="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-sky-600 to-sky-400 rounded-full" style="width: 95%;"></div>
+              </div>
+              <span class="text-xs text-slate-500 w-8">95%</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-violet-400 w-14 text-right font-medium">BASS</span>
+              <div class="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-violet-600 to-violet-400 rounded-full" style="width: 91%;"></div>
+              </div>
+              <span class="text-xs text-slate-500 w-8">91%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- B — Generative Melodies -->
+      <div class="bento-b card-hover relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm p-6">
+        <div class="absolute bottom-0 right-0 w-40 h-40 bg-violet-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/20 flex items-center justify-center mb-5">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13 Q6 5 9 3 Q12 5 15 13" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" fill="none"/><circle cx="9" cy="3" r="1.5" fill="#a78bfa"/></svg>
+        </div>
+
+        <h3 class="font-display font-700 text-xl text-slate-50 tracking-tighter mb-2">Generative Melodies</h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">Describe a vibe. Get a melody. Our model generates MIDI-ready hooks trained on jazz, R&B, trap, and hyperpop.</p>
+
+        <!-- Piano roll mockup -->
+        <div class="bg-slate-950/60 rounded-xl border border-white/[0.05] p-3 overflow-hidden">
+          <div class="flex flex-col gap-1">
+            <div class="flex gap-1 h-2.5">
+              <div class="w-6 bg-slate-700 rounded-sm opacity-30"></div>
+              <div class="w-8 bg-violet-500 rounded-sm opacity-70"></div>
+              <div class="w-3 bg-slate-700 rounded-sm opacity-30"></div>
+              <div class="w-10 bg-violet-400 rounded-sm opacity-60"></div>
+              <div class="w-4 bg-slate-700 rounded-sm opacity-30"></div>
+            </div>
+            <div class="flex gap-1 h-2.5">
+              <div class="w-4 bg-slate-700 rounded-sm opacity-30"></div>
+              <div class="w-3 bg-slate-700 rounded-sm opacity-30"></div>
+              <div class="w-12 bg-violet-500 rounded-sm opacity-80"></div>
+              <div class="w-5 bg-violet-400 rounded-sm opacity-50"></div>
+            </div>
+            <div class="flex gap-1 h-2.5">
+              <div class="w-10 bg-violet-500 rounded-sm opacity-60"></div>
+              <div class="w-3 bg-slate-700 rounded-sm opacity-30"></div>
+              <div class="w-6 bg-slate-700 rounded-sm opacity-30"></div>
+              <div class="w-8 bg-violet-400 rounded-sm opacity-70"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- C — Key Matching -->
+      <div class="bento-c card-hover relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm p-6">
+        <div class="absolute top-0 left-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/20 flex items-center justify-center mb-5">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.5" stroke="#2dd4bf" stroke-width="1.25"/><path d="M9 5.5v4l2.5 2" stroke="#2dd4bf" stroke-width="1.25" stroke-linecap="round"/></svg>
+        </div>
+
+        <h3 class="font-display font-700 text-xl text-slate-50 tracking-tighter mb-2">Real-time Key Matching</h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-5">Drop any sample. Instant BPM detection and harmonic key-shifting so everything stays in tune, always.</p>
+
+        <!-- Key display -->
+        <div class="flex items-center gap-3">
+          <div class="flex-1 bg-slate-950/60 rounded-xl border border-white/[0.05] p-3 text-center">
+            <div class="text-xs text-slate-500 mb-1">Original</div>
+            <div class="font-display font-700 text-2xl text-slate-300">G# maj</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="flex-1 bg-teal-500/10 rounded-xl border border-teal-500/20 p-3 text-center">
+            <div class="text-xs text-teal-500 mb-1">Matched</div>
+            <div class="font-display font-700 text-2xl text-teal-400">A min</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D/E/F — Small cards row -->
+      <div class="bento-d card-hover relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm p-5">
+        <div class="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/20 flex items-center justify-center mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="3" height="8" rx="1" fill="#fbbf24"/><rect x="5.5" y="2" width="3" height="10" rx="1" fill="#fbbf24" opacity="0.7"/><rect x="10" y="5" width="3" height="7" rx="1" fill="#fbbf24" opacity="0.5"/></svg>
+        </div>
+        <h3 class="font-display font-700 text-base text-slate-50 tracking-tight mb-1.5">Tempo Sync</h3>
+        <p class="text-slate-500 text-xs leading-relaxed">Match BPM across all stems in one click. Warp grids included.</p>
+        <div class="mt-4 flex items-center gap-1.5">
+          <span class="bg-amber-500/10 text-amber-400 rounded-full text-xs px-2 py-0.5 border border-amber-500/20">Auto-detect</span>
+          <span class="bg-amber-500/10 text-amber-400 rounded-full text-xs px-2 py-0.5 border border-amber-500/20">±0.01 BPM</span>
+        </div>
+      </div>
+
+      <div class="bento-e card-hover relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-sm p-5">
+        <div class="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/20 flex items-center justify-center mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#fb7185" stroke-width="1.2"/><path d="M4.5 7 Q7 3 9.5 7 Q7 11 4.5 7Z" fill="#fb7185" opacity="0.6"/></svg>
+        </div>
+        <h3 class="font-display font-700 text-base text-slate-50 tracking-tight mb-1.5">Vocal FX Chain</h3>
+        <p class="text-slate-500 text-xs leading-relaxed">Auto-tune, reverb, saturation — smart presets tuned to your genre.</p>
+        <div class="mt-4 flex items-center gap-1.5">
+          <span class="bg-rose-500/10 text-rose-400 rounded-full text-xs px-2 py-0.5 border border-rose-500/20">40+ FX</span>
+          <span class="bg-rose-500/10 text-rose-400 rounded-full text-xs px-2 py-0.5 border border-rose-500/20">AI Presets</span>
+        </div>
+      </div>
+
+      <div class="bento-f card-hover relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-emerald-950/50 to-slate-900/60 backdrop-blur-sm p-5">
+        <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-xl pointer-events-none"></div>
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z" fill="#34d399" opacity="0.8"/></svg>
+        </div>
+        <h3 class="font-display font-700 text-base text-slate-50 tracking-tight mb-1.5">AI Mastering</h3>
+        <p class="text-slate-500 text-xs leading-relaxed">Broadcast-ready masters in seconds. Streaming optimized by default.</p>
+        <div class="mt-4 flex items-center gap-1.5">
+          <span class="bg-emerald-500/10 text-emerald-400 rounded-full text-xs px-2 py-0.5 border border-emerald-500/20">Spotify ready</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     DEEP DIVE — ALTERNATING SECTIONS
+═══════════════════════════════════════════ -->
+<section id="deep-dive" class="relative py-28 px-5 overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute bottom-0 right-0 w-[600px] h-[400px] bg-emerald-500/[0.04] rounded-full blur-[160px]"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-20">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 mb-5">
+        <span class="text-xs text-emerald-400 font-medium tracking-wide uppercase">Deep Dive</span>
+      </div>
+      <h2 class="font-display font-800 text-4xl lg:text-6xl tracking-tighter text-slate-50 leading-tight">
+        Built different,<br /><span class="gradient-text">from the ground up.</span>
+      </h2>
+    </div>
+
+    <!-- Row 1: Left text, Right visual -->
+    <div class="flex flex-col lg:flex-row items-center gap-16 mb-28">
+      <div class="flex-1 max-w-lg">
+        <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 mb-6">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#34d399" opacity="0.3"/><circle cx="5" cy="5" r="2" fill="#34d399"/></svg>
+          <span class="text-xs text-emerald-400 font-medium">Signature Technology</span>
+        </div>
+
+        <h3 class="font-display font-800 text-3xl lg:text-4xl text-slate-50 tracking-tighter leading-tight mb-5">
+          Vocal Removal with<br />99.9% Accuracy.
+        </h3>
+
+        <p class="text-slate-400 leading-relaxed mb-8">Our Hyper-Demucs™ architecture processes each frequency band independently using transformer attention, then reconstructs the audio using phase-coherent masking. The result is a stem so clean, you'd think it was tracked dry in a booth.</p>
+
+        <div class="space-y-4">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div class="text-slate-200 font-medium text-sm mb-0.5">Phase-coherent masking</div>
+              <div class="text-slate-500 text-xs">Preserves natural transients and room tone even in dense mixes.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div class="text-slate-200 font-medium text-sm mb-0.5">Leakage suppression under 0.1%</div>
+              <div class="text-xs text-slate-500">Bleed from adjacent instruments is identified and filtered at the subband level.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>
+              <div class="text-slate-200 font-medium text-sm mb-0.5">Works on any genre</div>
+              <div class="text-xs text-slate-500">Hip-hop, EDM, jazz, classical — tested across 80+ musical categories.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-8">
+          <span class="bg-emerald-500/10 text-emerald-400 rounded-full text-xs px-3 py-1 border border-emerald-500/20">Hyper-Demucs™</span>
+          <span class="bg-slate-800 text-slate-400 rounded-full text-xs px-3 py-1 border border-slate-700">GPU-accelerated</span>
+          <span class="bg-slate-800 text-slate-400 rounded-full text-xs px-3 py-1 border border-slate-700">44.1kHz / 48kHz</span>
+          <span class="bg-slate-800 text-slate-400 rounded-full text-xs px-3 py-1 border border-slate-700">32-bit float</span>
+        </div>
+      </div>
+
+      <!-- Right: Visual card -->
+      <div class="flex-1 relative">
+        <div class="absolute -inset-8 bg-emerald-500/[0.06] rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative border-gradient rounded-2xl overflow-hidden p-6" style="box-shadow: 0 30px 80px rgba(0,0,0,0.5);">
+          <!-- Before/After waveform comparison -->
+          <div class="mb-4 flex items-center justify-between">
+            <span class="text-sm font-display font-600 text-slate-200">Vocal Isolation Preview</span>
+            <div class="flex gap-1">
+              <span class="bg-slate-800 text-slate-400 rounded-md text-xs px-2 py-1 border border-slate-700">Before</span>
+              <span class="bg-emerald-500/20 text-emerald-400 rounded-md text-xs px-2 py-1 border border-emerald-500/30">After</span>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-xs text-slate-500 mb-1.5">
+                <span>Original Mix</span>
+                <span class="text-slate-400">Dense</span>
+              </div>
+              <div class="h-12 bg-slate-950/60 rounded-lg border border-white/[0.04] overflow-hidden flex items-center px-2 gap-px">
+                <div class="h-2 w-1 bg-slate-500 rounded-full opacity-70"></div>
+                <div class="h-8 w-1 bg-slate-400 rounded-full opacity-60"></div>
+                <div class="h-10 w-1 bg-slate-400 rounded-full opacity-80"></div>
+                <div class="h-6 w-1 bg-slate-500 rounded-full opacity-60"></div>
+                <div class="h-9 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-11 w-1 bg-slate-300 rounded-full opacity-50"></div>
+                <div class="h-5 w-1 bg-slate-500 rounded-full opacity-60"></div>
+                <div class="h-8 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-7 w-1 bg-slate-500 rounded-full opacity-60"></div>
+                <div class="h-10 w-1 bg-slate-400 rounded-full opacity-75"></div>
+                <div class="h-4 w-1 bg-slate-600 rounded-full opacity-60"></div>
+                <div class="h-9 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-11 w-1 bg-slate-300 rounded-full opacity-50"></div>
+                <div class="h-6 w-1 bg-slate-500 rounded-full opacity-65"></div>
+                <div class="h-8 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-3 w-1 bg-slate-600 rounded-full opacity-55"></div>
+                <div class="h-10 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-7 w-1 bg-slate-500 rounded-full opacity-65"></div>
+                <div class="h-9 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-5 w-1 bg-slate-500 rounded-full opacity-60"></div>
+                <div class="h-8 w-1 bg-slate-400 rounded-full opacity-70"></div>
+                <div class="h-11 w-1 bg-slate-300 rounded-full opacity-50"></div>
+                <div class="h-4 w-1 bg-slate-600 rounded-full opacity-60"></div>
+                <div class="h-7 w-1 bg-slate-500 rounded-full opacity-65"></div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+              <div class="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1L6 4H9L6.5 5.75L7.25 9L5 7.5L2.75 9L3.5 5.75L1 4H4L5 1Z" fill="#34d399"/></svg>
+                <span class="text-xs text-emerald-400 font-medium">AI Processing</span>
+              </div>
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs text-emerald-500 mb-1.5">
+                <span>Isolated Vocal</span>
+                <span class="text-emerald-400 font-medium">99.9% clean</span>
+              </div>
+              <div class="h-12 bg-slate-950/60 rounded-lg border border-emerald-500/10 overflow-hidden flex items-center px-2 gap-px">
+                <div class="h-1 w-1 bg-emerald-500 rounded-full opacity-40"></div>
+                <div class="h-5 w-1 bg-emerald-500 rounded-full opacity-70"></div>
+                <div class="h-9 w-1 bg-emerald-400 rounded-full opacity-80"></div>
+                <div class="h-3 w-1 bg-emerald-500 rounded-full opacity-50"></div>
+                <div class="h-7 w-1 bg-emerald-400 rounded-full opacity-75"></div>
+                <div class="h-10 w-1 bg-emerald-300 rounded-full opacity-70"></div>
+                <div class="h-2 w-1 bg-emerald-500 rounded-full opacity-45"></div>
+                <div class="h-6 w-1 bg-emerald-400 rounded-full opacity-75"></div>
+                <div class="h-4 w-1 bg-emerald-500 rounded-full opacity-55"></div>
+                <div class="h-8 w-1 bg-emerald-400 rounded-full opacity-80"></div>
+                <div class="h-1 w-1 bg-emerald-600 rounded-full opacity-40"></div>
+                <div class="h-7 w-1 bg-emerald-400 rounded-full opacity-75"></div>
+                <div class="h-10 w-1 bg-emerald-300 rounded-full opacity-70"></div>
+                <div class="h-3 w-1 bg-emerald-500 rounded-full opacity-50"></div>
+                <div class="h-6 w-1 bg-emerald-400 rounded-full opacity-75"></div>
+                <div class="h-1 w-1 bg-emerald-600 rounded-full opacity-40"></div>
+                <div class="h-8 w-1 bg-emerald-400 rounded-full opacity-78"></div>
+                <div class="h-4 w-1 bg-emerald-500 rounded-full opacity-60"></div>
+                <div class="h-9 w-1 bg-emerald-400 rounded-full opacity-80"></div>
+                <div class="h-2 w-1 bg-emerald-500 rounded-full opacity-45"></div>
+                <div class="h-6 w-1 bg-emerald-400 rounded-full opacity-75"></div>
+                <div class="h-10 w-1 bg-emerald-300 rounded-full opacity-68"></div>
+                <div class="h-3 w-1 bg-emerald-500 rounded-full opacity-50"></div>
+                <div class="h-5 w-1 bg-emerald-400 rounded-full opacity-70"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric bar -->
+          <div class="mt-5 pt-5 border-t border-white/[0.04] grid grid-cols-3 gap-4">
+            <div class="text-center">
+              <div class="font-display font-700 text-xl text-emerald-400">12ms</div>
+              <div class="text-xs text-slate-500 mt-0.5">Latency</div>
+            </div>
+            <div class="text-center border-x border-white/[0.04]">
+              <div class="font-display font-700 text-xl text-slate-200">4</div>
+              <div class="text-xs text-slate-500 mt-0.5">Stems out</div>
+            </div>
+            <div class="text-center">
+              <div class="font-display font-700 text-xl text-emerald-400">99.9%</div>
+              <div class="text-xs text-slate-500 mt-0.5">Accuracy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Right text, Left visual -->
+    <div class="flex flex-col lg:flex-row-reverse items-center gap-16">
+      <div class="flex-1 max-w-lg">
+        <div class="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-3 py-1 mb-6">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" fill="#a78bfa" opacity="0.3"/><circle cx="5" cy="5" r="2" fill="#a78bfa"/></svg>
+          <span class="text-xs text-violet-400 font-medium">Generative Engine</span>
+        </div>
+
+        <h3 class="font-display font-800 text-3xl lg:text-4xl text-slate-50 tracking-tighter leading-tight mb-5">
+          From prompt to<br />playable MIDI in 3s.
+        </h3>
+
+        <p class="text-slate-400 leading-relaxed mb-8">Describe your mood, genre, or vibe. Our LLM-powered composition engine generates harmonic, rhythmically coherent MIDI phrases you can drag straight into your DAW.</p>
+
+        <div class="space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+            <div class="text-xs text-slate-500 mb-2 font-medium">PROMPT</div>
+            <div class="text-sm text-slate-200">"Dark trap melody in G minor with a jazz chord drop on the 3rd bar"</div>
+          </div>
+          <div class="flex items-center gap-2 pl-4">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M3 8l4 4 4-4" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="text-xs text-violet-400">Generated in 2.8s</span>
+          </div>
+          <div class="bg-violet-500/[0.06] border border-violet-500/20 rounded-xl p-4">
+            <div class="text-xs text-violet-400 mb-2 font-medium">MIDI OUTPUT</div>
+            <div class="flex items-end gap-1 h-8">
+              <div class="w-2 h-3 bg-violet-500 rounded-sm opacity-80"></div>
+              <div class="w-2 h-6 bg-violet-400 rounded-sm opacity-70"></div>
+              <div class="w-2 h-4 bg-violet-500 rounded-sm opacity-80"></div>
+              <div class="w-2 h-8 bg-violet-300 rounded-sm opacity-60"></div>
+              <div class="w-2 h-5 bg-violet-400 rounded-sm opacity-75"></div>
+              <div class="w-2 h-7 bg-violet-500 rounded-sm opacity-70"></div>
+              <div class="w-2 h-3 bg-violet-400 rounded-sm opacity-80"></div>
+              <div class="w-2 h-6 bg-violet-300 rounded-sm opacity-65"></div>
+              <div class="w-2 h-8 bg-violet-500 rounded-sm opacity-70"></div>
+              <div class="w-2 h-4 bg-violet-400 rounded-sm opacity-75"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left visual -->
+      <div class="flex-1 relative">
+        <div class="absolute -inset-8 bg-violet-500/[0.05] rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/60 backdrop-blur-sm p-6" style="box-shadow: 0 30px 80px rgba(0,0,0,0.5);">
+          <div class="mb-4 text-sm font-display font-600 text-slate-200">Live Composition</div>
+
+          <!-- Fake chord progression -->
+          <div class="grid grid-cols-4 gap-2 mb-4">
+            <div class="bg-violet-500/20 border border-violet-500/30 rounded-lg p-3 text-center">
+              <div class="font-display font-700 text-lg text-violet-300">Gm</div>
+              <div class="text-xs text-violet-500 mt-0.5">i</div>
+            </div>
+            <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-3 text-center">
+              <div class="font-display font-700 text-lg text-slate-300">Bb</div>
+              <div class="text-xs text-slate-500 mt-0.5">III</div>
+            </div>
+            <div class="bg-slate-800/60 border border-slate-700 rounded-lg p-3 text-center">
+              <div class="font-display font-700 text-lg text-slate-300">Eb</div>
+              <div class="text-xs text-slate-500 mt-0.5">VI</div>
+            </div>
+            <div class="bg-violet-500/10 border border-violet-500/20 rounded-lg p-3 text-center">
+              <div class="font-display font-700 text-lg text-violet-400">D7</div>
+              <div class="text-xs text-violet-500 mt-0.5">V7</div>
+            </div>
+          </div>
+
+          <!-- Stats row -->
+          <div class="flex gap-3 mb-4">
+            <div class="flex-1 bg-slate-950/60 rounded-lg border border-white/[0.04] p-3 text-center">
+              <div class="font-display font-700 text-xl text-violet-400">128</div>
+              <div class="text-xs text-slate-500">BPM</div>
+            </div>
+            <div class="flex-1 bg-slate-950/60 rounded-lg border border-white/[0.04] p-3 text-center">
+              <div class="font-display font-700 text-xl text-slate-200">4/4</div>
+              <div class="text-xs text-slate-500">Meter</div>
+            </div>
+            <div class="flex-1 bg-slate-950/60 rounded-lg border border-white/[0.04] p-3 text-center">
+              <div class="font-display font-700 text-xl text-slate-200">8</div>
+              <div class="text-xs text-slate-500">Bars</div>
+            </div>
+          </div>
+
+          <button class="w-full py-2.5 rounded-xl bg-violet-500/20 border border-violet-500/30 text-sm text-violet-300 font-medium hover:bg-violet-500/30 transition-colors flex items-center justify-center gap-2">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Export MIDI
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     TESTIMONIALS
+═══════════════════════════════════════════ -->
+<section id="testimonials" class="relative py-28 px-5 overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-1/2 left-1/4 w-[400px] h-[300px] bg-emerald-500/[0.04] rounded-full blur-[120px]"></div>
+  </div>
+
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 mb-5">
+        <span class="text-xs text-emerald-400 font-medium tracking-wide uppercase">Wall of Love</span>
+      </div>
+      <h2 class="font-display font-800 text-4xl lg:text-5xl tracking-tighter text-slate-50 leading-tight">
+        Producers love us.<br /><span class="gradient-text">Here's why.</span>
+      </h2>
+    </div>
+
+    <!-- Testimonial grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <!-- Card 1 -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-transparent p-6">
+        <div class="flex mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+        </div>
+        <p class="text-slate-300 text-sm leading-relaxed mb-5">"Stem separation is insane. I've tried everything — iZotope, Lalal.ai, you name it. Nothing comes close to the vocal clarity here. My remix workflow went from 4 hours to 45 minutes."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-display font-700">M</div>
+          <div>
+            <div class="text-sm text-slate-200 font-medium">Marcus Webb</div>
+            <div class="text-xs text-slate-500">Producer — Atlantic Records</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 (featured) -->
+      <div class="card-hover relative rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.03] p-6">
+        <div class="absolute top-4 right-4">
+          <span class="bg-emerald-500/10 text-emerald-400 rounded-full text-xs px-2 py-0.5 border border-emerald-500/20">Top Review</span>
+        </div>
+        <div class="flex mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+        </div>
+        <p class="text-slate-200 text-sm leading-relaxed mb-5">"The generative melody feature is genuinely magical. I typed 'melancholy lo-fi with a Coltrane-ish chord voicing' and what came back was immediately usable. This is the future of beatmaking."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-pink-600 flex items-center justify-center text-white text-sm font-display font-700">S</div>
+          <div>
+            <div class="text-sm text-slate-200 font-medium">Sofia Reyes</div>
+            <div class="text-xs text-slate-500">Beatmaker & Multi-platinum artist</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-transparent p-6">
+        <div class="flex mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+        </div>
+        <p class="text-slate-300 text-sm leading-relaxed mb-5">"Key matching and BPM sync used to eat up so much of my session time. Now it's automatic. Fall in Luv saved me literal hours per track. Zero compromises on quality either."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-sm font-display font-700">D</div>
+          <div>
+            <div class="text-sm text-slate-200 font-medium">DJ Darius</div>
+            <div class="text-xs text-slate-500">DJ & Producer — Berlin</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-transparent p-6">
+        <div class="flex mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#64748b"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+        </div>
+        <p class="text-slate-300 text-sm leading-relaxed mb-5">"The AI mastering is shockingly good for the price. I ran a full EP through it and every track came out streaming-ready. The LUFS targeting alone would have cost me $300 at a mastering house."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white text-sm font-display font-700">A</div>
+          <div>
+            <div class="text-sm text-slate-200 font-medium">Anya Kowalski</div>
+            <div class="text-xs text-slate-500">Independent artist — Warsaw</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-transparent p-6">
+        <div class="flex mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+        </div>
+        <p class="text-slate-300 text-sm leading-relaxed mb-5">"Pulled an acapella from a YouTube video and the stems were cleaner than half the stuff I record in the studio. No artifacts, no reverb bleed. I was genuinely shocked."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-sm font-display font-700">T</div>
+          <div>
+            <div class="text-sm text-slate-200 font-medium">Tariq James</div>
+            <div class="text-xs text-slate-500">Producer — Los Angeles</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-transparent p-6">
+        <div class="flex mb-4">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="#fbbf24"><path d="M7 1L8.5 5H13L9.5 7.5L10.5 12L7 9.5L3.5 12L4.5 7.5L1 5H5.5L7 1Z"/></svg>
+        </div>
+        <p class="text-slate-300 text-sm leading-relaxed mb-5">"I teach music production at a conservatory. Showed this to my students and half of them had a usable demo done within the hour. The UX is unlike anything else in this space."</p>
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-sm font-display font-700">H</div>
+          <div>
+            <div class="text-sm text-slate-200 font-medium">Dr. Helena Cruz</div>
+            <div class="text-xs text-slate-500">Music Production Educator</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PRICING
+═══════════════════════════════════════════ -->
+<section id="pricing" class="relative py-28 px-5 overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-emerald-500/[0.05] rounded-full blur-[160px]"></div>
+  </div>
+
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 mb-5">
+        <span class="text-xs text-emerald-400 font-medium tracking-wide uppercase">Simple Pricing</span>
+      </div>
+      <h2 class="font-display font-800 text-4xl lg:text-6xl tracking-tighter text-slate-50 leading-tight mb-4">
+        Start free.<br /><span class="gradient-text">Scale when you're ready.</span>
+      </h2>
+      <p class="text-slate-400 text-base max-w-md mx-auto">No hidden fees. No per-export charges. Full access from day one.</p>
+    </div>
+
+    <!-- Toggle -->
+    <div class="flex items-center justify-center gap-3 mb-12">
+      <span class="text-sm text-slate-400">Monthly</span>
+      <div class="w-12 h-6 bg-emerald-500/30 border border-emerald-500/40 rounded-full relative cursor-pointer">
+        <div class="absolute right-1 top-1 w-4 h-4 bg-emerald-400 rounded-full"></div>
+      </div>
+      <span class="text-sm text-emerald-400 font-medium">Annual <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-xs px-2 py-0.5">Save 30%</span></span>
+    </div>
+
+    <!-- Pricing cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+
+      <!-- Starter -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm p-7 flex flex-col">
+        <div>
+          <div class="text-sm font-medium text-slate-400 mb-4 uppercase tracking-widest">Starter</div>
+          <div class="flex items-end gap-1 mb-1">
+            <span class="font-display font-800 text-4xl text-slate-50">$0</span>
+          </div>
+          <div class="text-sm text-slate-500 mb-7">Forever free</div>
+
+          <div class="space-y-3 mb-8">
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              5 stem separations / month
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              10 AI melody generations
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              MP3 export only
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-500 line-through">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/></svg>
+              AI Mastering
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-500 line-through">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="#475569" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Commercial license
+            </div>
+          </div>
+        </div>
+
+        <a href="#" class="mt-auto block w-full py-3 rounded-xl text-center text-sm font-medium text-slate-300 bg-slate-800/60 border border-slate-700 hover:bg-slate-700/60 hover:text-slate-200 transition-all">
+          Get started free
+        </a>
+      </div>
+
+      <!-- Pro (featured) -->
+      <div class="card-hover relative rounded-2xl ring-2 ring-emerald-500 bg-slate-900/80 backdrop-blur-sm p-7 flex flex-col overflow-hidden" style="box-shadow: 0 0 60px rgba(16,185,129,0.2), 0 30px 80px rgba(0,0,0,0.5);">
+        <!-- Glow -->
+        <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.07] to-transparent pointer-events-none rounded-2xl"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-16 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Badge -->
+        <div class="absolute -top-px left-1/2 -translate-x-1/2">
+          <div class="bg-emerald-500 text-white text-xs font-medium px-4 py-1 rounded-b-full">Most Popular</div>
+        </div>
+
+        <div class="relative z-10 pt-4">
+          <div class="text-sm font-medium text-emerald-400 mb-4 uppercase tracking-widest">Pro</div>
+          <div class="flex items-end gap-1 mb-1">
+            <span class="font-display font-800 text-4xl text-slate-50">$19</span>
+            <span class="text-slate-400 text-sm mb-1">/mo</span>
+          </div>
+          <div class="text-sm text-slate-500 mb-7">Billed annually ($27/mo monthly)</div>
+
+          <div class="space-y-3 mb-8">
+            <div class="flex items-center gap-2.5 text-sm text-slate-200">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Unlimited stem separations
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-200">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              500 AI melody generations/mo
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-200">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              WAV & FLAC 32-bit export
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-200">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              AI Mastering (50/mo)
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-200">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Full commercial license
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-200">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Priority GPU processing
+            </div>
+          </div>
+        </div>
+
+        <a href="#" class="relative mt-auto block w-full py-3.5 rounded-xl text-center text-sm font-medium text-white overflow-hidden glow-emerald transition-all hover:scale-[1.02]">
+          <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-xl"></div>
+          <div class="absolute inset-0 shimmer rounded-xl"></div>
+          <span class="relative">Start Pro Trial →</span>
+        </a>
+      </div>
+
+      <!-- Studio -->
+      <div class="card-hover relative rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm p-7 flex flex-col">
+        <div>
+          <div class="text-sm font-medium text-slate-400 mb-4 uppercase tracking-widest">Studio</div>
+          <div class="flex items-end gap-1 mb-1">
+            <span class="font-display font-800 text-4xl text-slate-50">$79</span>
+            <span class="text-slate-400 text-sm mb-1">/mo</span>
+          </div>
+          <div class="text-sm text-slate-500 mb-7">Billed annually, up to 10 seats</div>
+
+          <div class="space-y-3 mb-8">
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Everything in Pro
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Unlimited AI mastering
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              API access + webhooks
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              White-label exports
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-slate-400">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Dedicated support + SLA
+            </div>
+          </div>
+        </div>
+
+        <a href="#" class="mt-auto block w-full py-3 rounded-xl text-center text-sm font-medium text-slate-300 bg-slate-800/60 border border-slate-700 hover:bg-slate-700/60 hover:text-slate-200 transition-all">
+          Contact sales
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     CTA BAND
+═══════════════════════════════════════════ -->
+<section class="relative py-28 px-5 overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(16,185,129,0.07) 0%, transparent 70%);"></div>
+    <div class="absolute inset-0" style="background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px); background-size: 40px 40px;"></div>
+  </div>
+  <div class="relative max-w-3xl mx-auto text-center">
+    <h2 class="font-display font-800 text-4xl lg:text-6xl tracking-tighter text-slate-50 leading-tight mb-6">
+      Your next record<br /><span class="gradient-text">starts right now.</span>
+    </h2>
+    <p class="text-slate-400 text-lg mb-10">Join 10,000+ producers who've already upgraded their workflow. No credit card required.</p>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="#pricing" class="relative group px-8 py-4 rounded-xl text-base font-medium text-white overflow-hidden glow-emerald transition-all hover:scale-105 w-full sm:w-auto text-center">
+        <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-xl"></div>
+        <div class="absolute inset-0 shimmer rounded-xl"></div>
+        <span class="relative">Start for free — no card needed</span>
+      </a>
+    </div>
+    <p class="text-xs text-slate-600 mt-5">No credit card · Cancel anytime · 5 free stems/month forever</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="border-t border-slate-800/60 px-5 pt-16 pb-10">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+
+      <!-- Brand col -->
+      <div class="col-span-2">
+        <a href="#" class="flex items-center gap-2 mb-4 group">
+          <div class="relative w-7 h-7 flex-shrink-0">
+            <div class="absolute inset-0 bg-emerald-500 rounded-lg opacity-20"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><path d="M3 13.5 Q5 9 9 4.5 Q13 9 15 13.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" fill="none"/><circle cx="9" cy="9" r="2" fill="#34d399"/></svg>
+            </div>
+          </div>
+          <span class="font-display font-700 text-slate-200 text-sm tracking-tight">Fall in Luv <span class="text-emerald-400">Music</span></span>
+        </a>
+        <p class="text-slate-500 text-sm leading-relaxed max-w-[220px] mb-5">The AI co-producer for the next generation of beatmakers.</p>
+        <div class="flex items-center gap-3">
+          <a href="#" class="w-8 h-8 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-center text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M12.6 1H1.4C1.15 1 1 1.15 1 1.4v11.2c0 .25.15.4.4.4H7.4V8.4H5.6V6.2h1.8V4.9c0-1.8 1.1-2.8 2.7-2.8.77 0 1.43.06 1.62.09v1.88h-1.11c-.87 0-1.04.41-1.04 1.02V6.2h2.07l-.27 2.2H9.57V13H12.6c.25 0 .4-.15.4-.4V1.4c0-.25-.15-.4-.4-.4z"/></svg>
+          </a>
+          <a href="#" class="w-8 h-8 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-center text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M13 1.5l-5.1 5.9L13 12.5H9.8L6.8 8.7 3.3 12.5H1l5.4-6.2L1 1.5h3.3l2.7 3.5L10.7 1.5H13z"/></svg>
+          </a>
+          <a href="#" class="w-8 h-8 rounded-lg border border-slate-800 bg-slate-900/60 flex items-center justify-center text-slate-500 hover:text-slate-300 hover:border-slate-700 transition-colors">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1C3.686 1 1 3.686 1 7c0 2.654 1.72 4.91 4.102 5.705.3.055.41-.13.41-.288 0-.143-.005-.52-.008-1.022-1.67.363-2.023-.805-2.023-.805-.273-.694-.667-0.879-.667-0.879-.545-.373.041-.365.041-.365.603.042.921.619.921.619.536.918 1.407.653 1.75.499.055-.388.21-.653.38-.803C4.146 10.47 2.8 9.97 2.8 7.7c0-.648.231-1.178.612-1.593-.062-.15-.266-.754.058-1.572 0 0 .499-.16 1.635.61.474-.132.983-.198 1.489-.2.506.002 1.015.068 1.49.2 1.136-.77 1.634-.61 1.634-.61.324.818.12 1.422.059 1.572.38.415.61.945.61 1.593 0 2.279-1.388 2.78-2.71 2.925.213.184.403.546.403 1.1 0 .794-.007 1.434-.007 1.629 0 .16.107.347.413.288C11.282 11.907 13 9.653 13 7c0-3.314-2.686-6-6-6z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div>
+        <h4 class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-5">Product</h4>
+        <ul class="space-y-3">
+          <li><a href="#features" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Features</a></li>
+          <li><a href="#pricing" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Pricing</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Changelog</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Roadmap</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">API Docs</a></li>
+        </ul>
+      </div>
+
+      <!-- Use Cases -->
+      <div>
+        <h4 class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-5">Use Cases</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Remixing</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Beat Making</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Mastering</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Sampling</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Film Scoring</a></li>
+        </ul>
+      </div>
+
+      <!-- Company -->
+      <div>
+        <h4 class="text-xs font-medium text-slate-400 uppercase tracking-widest mb-5">Company</h4>
+        <ul class="space-y-3">
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">About</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Blog</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Careers <span class="text-emerald-400 text-xs ml-1">3 open</span></a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Press Kit</a></li>
+          <li><a href="#" class="text-sm text-slate-500 hover:text-slate-300 transition-colors">Contact</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-slate-800/60 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-xs text-slate-600">© 2025 Fall in Luv Music, Inc. All rights reserved.</div>
+      <div class="flex items-center gap-5">
+        <a href="#" class="text-xs text-slate-600 hover:text-slate-400 transition-colors">Privacy</a>
+        <a href="#" class="text-xs text-slate-600 hover:text-slate-400 transition-colors">Terms</a>
+        <a href="#" class="text-xs text-slate-600 hover:text-slate-400 transition-colors">Cookies</a>
+        <a href="#" class="text-xs text-slate-600 hover:text-slate-400 transition-colors">Status</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
 </Layout>
